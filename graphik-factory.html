@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graphik Factory</title>
+<meta name="description" content="Graphik Factory, Creative Design Production : identité, images, sites et applications.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body { margin: 0; background: #ffffff; color: #111111; font-family: 'Space Grotesk', Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+
+  /* En-tête : marque seule au centre, posée sur le film, puis blanche au défilement */
+  .entete { position: sticky; top: 0; z-index: 30; display: grid; grid-template-columns: auto 1fr; align-items: center; padding: 22px 40px; background: #ffffff; color: #111111; border-bottom: 1px solid transparent; transition: border-color .3s ease; }
+  .entete.compacte { border-bottom-color: #ececea; }
+  .entete nav { display: flex; gap: 30px; font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; }
+  .entete nav.droite { justify-content: flex-end; }
+  .marque { font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 30px; letter-spacing: -0.4px; white-space: nowrap; }
+  .marque em { font-weight: 400; }
+
+  /* Ouverture : la réalisation en plein écran, la légende posée dessus */
+  .ouverture { padding: 64px 0 0 0; text-align: center; }
+  .film { position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; background: #0d0d0d; }
+  .film .media { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+  .film.recadre { aspect-ratio: 1600 / 954; }
+  .film.recadre .media { top: -4.822%; height: 104.822%; }
+  .film video { opacity: 0; transition: opacity .8s ease; }
+  .film.joue video { opacity: 1; }
+  .tactile .film video { transition-duration: .25s; }
+  /* au glissé du doigt (ou de la souris dans l’aperçu), rien ne se sélectionne ni ne se traîne */
+  html.tactile { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+  html.tactile img, html.tactile video, html.tactile a { -webkit-user-drag: none; }
+  .ouverture .liens { margin-bottom: 44px; }
+  .projet:not(.tete) .liens { display: none; }
+  .projet:not(.tete) .phrase { margin-bottom: 44px; }
+  .projet + .projet { padding-top: 140px; }
+  .surtitre { margin: 0 0 10px 0; font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; }
+  .ouverture h2 { margin: 0 0 10px 0; font-weight: 400; font-size: 34px; letter-spacing: -0.3px; }
+  .tete h2 { margin: 0 0 14px 0; font-weight: 500; font-size: clamp(40px, 5.2vw, 76px); line-height: 1.02; letter-spacing: -0.03em; }
+  .ouverture .phrase { margin: 0 auto 18px auto; max-width: 34em; font-size: 16px; line-height: 1.5; color: #55554f; }
+  .liens { display: flex; justify-content: center; gap: 28px; font-size: 14px; }
+  .liens a { border-bottom: 1px solid currentColor; padding-bottom: 2px; }
+
+  /* Un seul module, répété : surtitre, nom, une phrase, un lien, puis l’image */
+  .module { padding: 140px 40px 0 40px; text-align: center; }
+  .module h2 { margin: 0 0 10px 0; font-weight: 400; font-size: 34px; letter-spacing: -0.3px; }
+  .module .phrase { margin: 0 auto 18px auto; max-width: 34em; font-size: 16px; line-height: 1.5; color: #55554f; }
+  .module .phrase { margin-bottom: 44px; }
+  h2 a { transition: opacity .2s; }
+  h2 a:hover { opacity: 1; }
+  h2 a { position: relative; }
+  h2 a::after { content: "\2197"; position: absolute; left: 100%; top: .1em; margin-left: .18em; font-size: .55em; opacity: 0; transform: translate(-6px, 6px); transition: opacity .25s ease, transform .25s ease; }
+  h2 a:hover::after { opacity: 1; transform: none; }
+  .plein { width: 100%; aspect-ratio: 12 / 5; object-fit: cover; }
+  .module.large { padding-left: 0; padding-right: 0; }
+
+  .tuiles { display: grid; grid-template-columns: 1fr 1fr; gap: 104px 24px; padding: 140px 40px 0 40px; }
+  .tuile { padding: 0; text-align: center; display: flex; flex-direction: column; }
+  .tuile h2 { margin: 0 0 28px 0; font-weight: 400; font-size: 28px; letter-spacing: -0.3px; }
+  .tuile .phrase { margin: 0 auto 28px auto; max-width: 30em; font-size: 15px; line-height: 1.5; color: #55554f; }
+  .tuile .image { margin-top: auto; aspect-ratio: 16 / 10; background: #f1f1ef; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; color: #a3a39e; }
+
+  /* Studio et contact : le même module */
+  .studio { padding: 140px 40px 0 40px; text-align: center; }
+  .studio h2, .contact h2 { margin: 0 0 56px 0; font-weight: 400; font-size: 34px; letter-spacing: -0.3px; }
+  .studio .phrase { margin: 0 auto 56px auto; max-width: 34em; font-size: 16px; line-height: 1.5; color: #55554f; }
+  .disciplines { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; max-width: 1100px; margin: 0 auto; }
+  .disciplines h3 { margin: 0 0 6px 0; font-weight: 500; font-size: 15px; }
+  .disciplines p { margin: 0; font-size: 14px; line-height: 1.5; color: #77776f; }
+  .references { margin: 72px auto 0 auto; max-width: 900px; font-size: 14px; line-height: 1.7; color: #77776f; }
+  .references span { color: #111111; }
+
+  .contact { margin-top: 140px; padding: 120px 40px; text-align: center; background: #111111; color: #ffffff; }
+  .contact .adresse { display: inline-block; margin-bottom: 36px; font-size: clamp(24px, 3.4vw, 44px); letter-spacing: -0.5px; border-bottom: 1px solid rgba(255,255,255,.35); padding-bottom: 4px; }
+  .contact .liens { gap: 32px; flex-wrap: wrap; align-items: center; }
+  .contact .liens a { border: 0; }
+  .contact .visio { background: #ffffff; color: #111111; padding: 12px 24px; border-radius: 999px; }
+
+  .pied { background: #111111; color: #8a8a85; padding: 22px 40px; display: flex; justify-content: space-between; gap: 20px; font-size: 13px; border-top: 1px solid #262626; }
+  .pied p { margin: 0; display: flex; gap: 22px; }
+  .pied a:hover { color: #ffffff; }
+
+  @media (max-width: 760px) {
+    .entete { grid-template-columns: 1fr auto; padding: 16px 20px; }
+    .entete .gauche { display: none; }
+    .marque { font-size: 22px; }
+    .entete { grid-template-columns: auto 1fr; }
+    .entete nav { gap: 14px; font-size: 10px; letter-spacing: 1.4px; }
+    .ouverture { padding-top: 44px; }
+    .ouverture > :not(.film), .module > :not(.plein) { padding-left: 20px; padding-right: 20px; }
+    .ouverture h2 { font-size: 26px; }
+    .tete h2 { font-size: 30px; }
+    .module, .studio { padding: 80px 20px 0 20px; }
+    .module.large { padding-left: 0; padding-right: 0; }
+    .module h2, .studio h2, .contact h2 { font-size: 26px; }
+    .plein { aspect-ratio: 4 / 3; }
+    .tuiles { grid-template-columns: 1fr; padding: 80px 0 0 0; }
+    .tuiles { row-gap: 72px; padding-left: 20px; padding-right: 20px; }
+    .disciplines { grid-template-columns: 1fr 1fr; }
+    .contact { margin-top: 96px; padding: 80px 20px; }
+    .pied { padding: 20px; flex-direction: column-reverse; }
+  }
+
+  /* Le nom posé sur l’image : métier et ville en petit, le nom en grand en Playfair, sur un dégradé sombre */
+  .film { color: #ffffff; }
+  .film.fixe { aspect-ratio: 12 / 5; }
+  .film::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.42) 22%, rgba(0,0,0,0) 46%); }
+  .film .legende { position: absolute; left: 40px; right: 40px; bottom: 36px; z-index: 2; text-align: left; }
+  .film .legende .surtitre { margin: 0 0 8px 0; }
+  .film .legende h2 { margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: clamp(32px, 4.4vw, 68px); line-height: 1; letter-spacing: -0.01em; }
+  .film .legende h2 a::after { display: none; }
+  .film .legende h2 em { font-weight: 400; font-style: italic; }
+  .tete .film .legende h2 { font-size: clamp(40px, 5.6vw, 88px); }
+  .ouverture > .phrase, .module > .phrase { margin-top: 0; }
+  @media (max-width: 760px) {
+    .film .legende { left: 20px; right: 20px; bottom: 16px; }
+    .film.fixe { aspect-ratio: 4 / 3; }
+  }
+
+  .film .legende .sous { margin: 12px 0 0 0; max-width: 36em; font-size: 15px; line-height: 1.45; color: rgba(255,255,255,.86); }
+  .ouverture.projet, .module.large { padding-top: 0; }
+  .projet + .projet, .projet + .module.large { margin-top: 140px; }
+  @media (max-width: 760px) { .projet + .projet, .projet + .module.large { margin-top: 72px; } }
+  #realisations + .projet { margin-top: 0; }
+  @media (max-width: 760px) { .film .legende .sous { font-size: 13px; } }
+
+  /* Grande marque en ouverture, comme sur graphicfactor.io ; la petite marque de l’en-tête n’apparaît qu’après */
+  .grande-marque { position: relative; padding: 48px 40px 140px 40px; }
+  .grande-marque .mot { margin: 0 0 0 -0.05em; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: clamp(72px, 11.6vw, 210px); line-height: .84; letter-spacing: -0.03em; }
+  .grande-marque .mot em { font-weight: 400; }
+  .grande-marque .metier { position: absolute; right: 40px; bottom: 146px; margin: 0; font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; }
+  .entete .marque { opacity: 0; transition: opacity .3s ease; }
+  .entete.compacte .marque { opacity: 1; }
+  @media (max-width: 760px) {
+    .grande-marque { padding: 24px 20px 72px 20px; }
+    .grande-marque .metier { position: static; margin: 18px 0 0 0; }
+  }
+
+  /* Chaque réalisation tient entière dans l’écran, sous l’en-tête : pleine largeur, hauteur bornée, légende toujours visible */
+  @media (min-width: 761px) {
+    .projet .film, .module.large .film { width: 100%; aspect-ratio: auto; height: min(62.5vw, calc(100vh - var(--entete, 92px))); height: min(62.5vw, calc(100svh - var(--entete, 92px))); }
+    .projet .film.recadre { height: min(59.6vw, calc(100svh - var(--entete, 92px))); }
+    .module.large .film.fixe { height: min(41.7vw, calc(100svh - var(--entete, 92px))); }
+    .projet, .module.large { scroll-margin-top: var(--entete, 92px); }
+    .projet .film .media { object-position: 50% 0; }
+  }
+
+  .suite, .tuiles, .studio { padding-top: 140px; }
+  .contact { margin-top: 140px; }
+  @media (max-width: 760px) { .tuiles, .studio { padding-top: 72px; } .contact { margin-top: 72px; } }
+
+
+  /* Une bande de couleur par réalisation, comme un nuancier : numéro à gauche, teinte à droite */
+  .bande { height: 40px; background: var(--teinte); color: rgba(255,255,255,.88); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; }
+  @media (min-width: 761px) {
+    .projet .film, .module.large .film { height: min(62.5vw, calc(100svh - var(--entete, 92px) - 40px)); }
+    .module.large .film.fixe { height: min(41.7vw, calc(100svh - var(--entete, 92px) - 40px)); }
+    .projet .film.recadre { height: min(59.6vw, calc(100svh - var(--entete, 92px) - 40px)); }
+  }
+  @media (max-width: 760px) { .bande { height: 28px; padding: 0 20px; font-size: 10px; } }
+  .film.recadre .media { top: -3vw; height: calc(100% + 3vw); object-position: 50% 0; }
+
+  /* La bande se colle sous l’en-tête ; la légende prend doucement sa couleur puis s’y colle */
+  main > section { position: relative; }
+  .tuiles, .studio { background: #ffffff; z-index: 18; }
+  .contact { z-index: 18; }
+  .contact { background: #111111; }
+  .legende.flottante { position: sticky; margin-top: calc(var(--h, 0px) * -1); padding: 40px 40px 36px 40px; color: #ffffff; text-align: left; pointer-events: auto; }
+  .legende.flottante::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--teinte); opacity: var(--q, 0); }
+  .legende.flottante.collee::after { opacity: 1; }
+  .legende.flottante > * { position: relative; z-index: 1; }
+  .legende.flottante .surtitre { margin: 0 0 8px 0; }
+  .legende.flottante h2 { margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: clamp(32px, 4.4vw, 68px); line-height: 1; letter-spacing: -0.01em; }
+  .legende.flottante h2 em { font-weight: 400; font-style: italic; }
+  .legende.flottante h2 a::after { display: none; }
+  .tete .legende.flottante h2 { font-size: clamp(40px, 5.6vw, 88px); }
+  .legende.flottante .sous { margin: 12px 0 0 0; max-width: 36em; font-size: 15px; line-height: 1.45; color: rgba(255,255,255,.86); }
+  /* l’espace entre deux réalisations appartient à la réalisation, pour que la bande et le titre y restent collés */
+  .projet + .projet, .projet + .module.large { margin-top: 0; }
+  .projet, .module.large { padding-bottom: 140px; }
+  .module.large + .tuiles { padding-top: 0; }
+  @media (max-width: 760px) {
+    .legende.flottante { padding: 20px 20px 16px 20px; }
+    .legende.flottante .sous { font-size: 13px; }
+    .projet, .module.large { padding-bottom: 72px; }
+  }
+
+  /* La pile des réalisations : les sections s’effacent pour que bandes et titres restent collés jusqu’à la fin de la pile */
+  .pile { position: relative; }
+  .pile > section:not(.par-dessus) { display: contents; }
+  .pile .bande { position: sticky; }
+  .pile .film { position: relative; z-index: 1; }
+  .pile > .par-dessus { position: relative; z-index: 40; background: #ffffff; }
+  .pile > .contact.par-dessus { background: #111111; }
+
+  /* Bandeaux à hauteur fixe, calculée pour que toutes les réalisations s’accumulent ; la typographie suit cette hauteur */
+  .legende.flottante { height: var(--hb, 190px); padding: 0 40px; display: flex; flex-direction: column; justify-content: center; }
+  .legende.flottante .surtitre { margin: 0 0 calc(var(--hb, 190px) * .04) 0; font-size: clamp(9px, calc(var(--hb, 190px) * .058), 11px); }
+  .legende.flottante h2, .tete .legende.flottante h2 { font-size: calc(var(--hb, 190px) * .36); line-height: 1; }
+  .legende.flottante .sous { margin: calc(var(--hb, 190px) * .05) 0 0 0; font-size: clamp(11px, calc(var(--hb, 190px) * .08), 15px); }
+  @media (max-width: 760px) { .legende.flottante { padding: 0 20px; } }
+  .legende.flottante.collee { cursor: pointer; }
+  .legende.flottante.collee:hover h2 { opacity: .8; }
+
+  /* Réalisation ouverte en grand */
+  .vue { position: fixed; left: 0; right: 0; top: var(--entete, 78px); bottom: 0; z-index: 100; background: var(--teinte, #111111); display: flex; flex-direction: column; opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s; }
+  .vue.ouverte { opacity: 1; visibility: visible; }
+  .vue-tete { padding: 22px 40px 18px 40px; color: #ffffff; }
+  .vue-tete .surtitre { margin: 0 0 6px 0; font-size: 11px; }
+  .vue-tete h2 { margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: clamp(28px, 3.4vw, 48px); line-height: 1; }
+  .vue-tete h2 em { font-weight: 400; font-style: italic; }
+  .vue-tete h2 a::after { display: none; }
+  .vue-tete .sous { margin: 8px 0 0 0; font-size: 14px; color: rgba(255,255,255,.86); }
+  .vue-film { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 40px 32px 40px; }
+  .vue-film video { max-width: 100%; max-height: 100%; aspect-ratio: 16 / 10; width: auto; height: 100%; object-fit: contain; display: block; box-shadow: 0 20px 60px -20px rgba(0,0,0,.5); }
+  .vue-fermer { position: absolute; top: 14px; right: 30px; width: 44px; height: 44px; border: 0; background: none; color: #ffffff; font-size: 34px; line-height: 1; cursor: pointer; opacity: .85; }
+  .vue-fermer:hover { opacity: 1; }
+  html.vue-active { overflow: hidden; }
+  @media (max-width: 760px) { .vue-tete { padding: 16px 20px 12px 20px; } .vue-film { padding: 0 0 20px 0; } .vue-film video { width: 100%; height: auto; } .vue-fermer { right: 10px; } }
+  /* Studio et contact recouvrent la pile sans laisser d’interstice : les espaces sont dans les sections, pas entre elles */
+  .pile > .par-dessus { margin-top: 0 !important; margin-bottom: 0 !important; }
+  .pile > .studio.par-dessus { padding-bottom: 140px; }
+  @media (max-width: 760px) { .pile > .studio.par-dessus { padding-bottom: 72px; } }
+  .entete { z-index: 60; }
+  .studio { padding-top: 140px; }
+  @media (max-width: 760px) { .studio { padding-top: 72px; } }
+  .voile-film { position: absolute; left: 0; right: 0; top: -2px; bottom: var(--h, 0px); z-index: 2; pointer-events: none; background: var(--teinte); opacity: var(--q, 0); }
+  .attente-film { display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #6f6f6f; font-size: 11px; letter-spacing: 2.4px; text-transform: uppercase; }
+  #movup .film.fixe { aspect-ratio: auto; }
+  @media (max-width: 760px) { .film::after { background: linear-gradient(to top, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 30%); } }
+  /* Téléphone : en-tête sans chevauchement ; titres sur une ligne, à une taille commune calculée pour le plus long */
+  @media (max-width: 760px) {
+    .entete { padding: 14px 20px; }
+    .entete .marque { font-size: 20px; }
+    .entete nav a[href="#realisations"] { display: none; }
+    .entete nav { gap: 18px; font-size: 10px; letter-spacing: 1.6px; }
+    .legende.flottante .surtitre, .legende.flottante h2, .legende.flottante .sous { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #movup .film.fixe { aspect-ratio: 16 / 10; }
+    /* réalisation ouverte : le film suit le titre, sans vide au-dessus ; le titre laisse la place à la croix */
+    .vue-tete { padding: 18px 60px 16px 20px; }
+    .vue-tete h2 { font-size: 24px; line-height: 1.1; }
+    .vue-film { flex: 0 0 auto; display: block; padding: 0; }
+    .vue-film video { width: 100%; height: auto; max-height: none; aspect-ratio: auto; box-shadow: none; }
+    .vue { background: rgba(0,0,0,.72); }
+    .vue-tete { background: var(--teinte, #111111); }
+    .vue-film { background: #000000; }
+    .vue-fermer { top: 8px; right: 6px; }
+    .legende.flottante h2, .tete .legende.flottante h2 { font-size: min(calc(var(--hb, 190px) * .36), var(--titre, 100px)); line-height: 1.1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="entete" id="entete">
+  <a class="marque" href="#">Graphik <em>Factory</em></a>
+  <nav class="droite" aria-label="Navigation"><a href="#realisations">Réalisations</a><a href="#studio">Studio</a><a href="#contact">Contact</a></nav>
+</header>
+
+<main>
+  <section class="grande-marque" aria-label="Graphik Factory">
+    <p class="mot">Graphik<br><em>Factory</em></p>
+    <p class="metier" lang="en">Creative Design Production</p>
+  </section>
+  <span id="realisations"></span>
+  <section class="ouverture projet tete" id="alex-de-rouvray" aria-label="Alex de Rouvray">
+    <div class="bande" style="--teinte:#3f5f8c" aria-hidden="true"></div>
+    <div class="film">
+      <picture><source srcset="/media/alex-de-rouvray-poster.webp" type="image/webp"><img class="media" src="/media/alex-de-rouvray-poster.jpg" alt="Le site d’Alex de Rouvray"></picture>
+      <video class="media" data-src="/media/alex-de-rouvray.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="legende"><p class="surtitre">Designer · Paris</p><h2><a href="https://alexderouvray.com/" target="_blank" rel="noopener">Alex de <em>Rouvray</em></a></h2><p class="sous">Site e-commerce</p></div>
+    </div>
+  </section>
+
+  <section class="ouverture projet" id="chateaubriand" aria-label="Hôtel France et Chateaubriand">
+    <div class="bande" style="--teinte:#12304c" aria-hidden="true"></div>
+    <div class="film recadre">
+      <img class="media" src="/media/chateaubriand-poster.jpg" alt="Le site de l’Hôtel France et Chateaubriand">
+      <video class="media" data-src="/media/chateaubriand.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="legende"><p class="surtitre">Hôtellerie · Saint-Malo</p><h2><a href="https://www.hotel-chateaubriand-st-malo.com" target="_blank" rel="noopener">Hôtel France <em>&amp; Chateaubriand</em></a></h2><p class="sous">Site avec réservation en ligne · Bilingue</p></div>
+    </div>
+  </section>
+
+  <section class="ouverture projet" id="le-5" aria-label="du restaurant Le 5">
+    <div class="bande" style="--teinte:#1f5a6b" aria-hidden="true"></div>
+    <div class="film">
+      <picture><source srcset="/media/le-5-poster.webp" type="image/webp"><img class="media" src="/media/le-5-poster.jpg" alt="Le site du restaurant Le 5" loading="lazy"></picture>
+      <video class="media" data-src="/media/le-5.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="legende"><p class="surtitre">Restaurant · Saint-Malo</p><h2><a href="https://www.le5-restaurant.com" target="_blank" rel="noopener">Le <em>5</em></a></h2><p class="sous">Site avec réservation en ligne</p></div>
+    </div>
+  </section>
+
+  <section class="ouverture projet" id="frant-isaksson" aria-label="de Frant Isaksson">
+    <div class="bande" style="--teinte:#7a2e22" aria-hidden="true"></div>
+    <div class="film">
+      <picture><source srcset="/media/frant-isaksson-poster.webp" type="image/webp"><img class="media" src="/media/frant-isaksson-poster.jpg" alt="Le site de Frant Isaksson" loading="lazy"></picture>
+      <video class="media" data-src="/media/frant-isaksson.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="legende"><p class="surtitre">Mode · Copenhague</p><h2><a href="https://www.frant-isaksson.com/" target="_blank" rel="noopener">Frant <em>Isaksson</em></a></h2><p class="sous">Site e-commerce · Bilingue</p></div>
+    </div>
+  </section>
+
+  <section class="ouverture projet" id="enfants-rouges" aria-label="de l’Agence des Enfants Rouges">
+    <div class="bande" style="--teinte:#b3202f" aria-hidden="true"></div>
+    <div class="film">
+      <picture><source srcset="/media/enfants-rouges-poster.webp" type="image/webp"><img class="media" src="/media/enfants-rouges-poster.jpg" alt="Le site de l’Agence des Enfants Rouges" loading="lazy"></picture>
+      <video class="media" data-src="/media/enfants-rouges.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="legende"><p class="surtitre">Agence immobilière · Paris</p><h2><a href="https://www.agencedesenfantsrouges.com" target="_blank" rel="noopener">Les Enfants <em>Rouges</em></a></h2><p class="sous">Site d’annonces immobilières</p></div>
+    </div>
+  </section>
+
+  <section class="ouverture projet" id="atelier-iugz" aria-label="de l’Atelier IUGZ">
+    <div class="bande" style="--teinte:#5b3f8c" aria-hidden="true"></div>
+    <div class="film">
+      <picture><source srcset="/media/atelier-iugz-poster.webp" type="image/webp"><img class="media" src="/media/atelier-iugz-poster.jpg" alt="Le site de l’Atelier IUGZ" loading="lazy"></picture>
+      <video class="media" data-src="/media/atelier-iugz.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="legende"><p class="surtitre">Lunetier</p><h2><a href="https://atelier-iugz.com" target="_blank" rel="noopener">Atelier <em>IUGZ</em></a></h2><p class="sous">Site vitrine · Configurateur de lunettes</p></div>
+    </div>
+  </section>
+
+  <section class="ouverture projet" id="desert-prod" aria-label="des Productions du Désert">
+    <div class="bande" style="--teinte:#a8743a" aria-hidden="true"></div>
+    <div class="film">
+      <picture><source srcset="/media/desert-prod-poster.webp" type="image/webp"><img class="media" src="/media/desert-prod-poster.jpg" alt="Le site des Productions du Désert" loading="lazy"></picture>
+      <video class="media" data-src="/media/desert-prod.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>
+      <div class="legende"><p class="surtitre">Production audiovisuelle · Paris</p><h2><a href="https://www.desert-prod.com" target="_blank" rel="noopener">Les Productions <em>du Désert</em></a></h2><p class="sous">Site vitrine</p></div>
+    </div>
+  </section>
+
+  <section class="ouverture projet" id="movup" aria-label="MovUP">
+    <div class="bande" style="--teinte:#b84c00" aria-hidden="true"></div>
+    <div class="film fixe">
+      <div class="media attente-film">movup.io · film à venir</div>
+      <div class="legende"><p class="surtitre">SaaS · Dinan</p><h2><a href="https://movup.io" target="_blank" rel="noopener">Mov<em>UP</em></a></h2><p class="sous">Application web de prospection</p></div>
+    </div>
+  </section>
+
+  <section class="studio" id="studio" aria-label="Studio">
+    <p class="surtitre">Studio</p>
+    <h2>De l’identité au site, une seule équipe.</h2>
+    <div class="disciplines">
+      <div><h3>Identité</h3><p>Logo, charte, identité visuelle.</p></div>
+      <div><h3>Images</h3><p>Direction artistique, photo et film.</p></div>
+      <div><h3>Sites</h3><p>Vitrine, réservation ou boutique.</p></div>
+      <div><h3>Applications</h3><p>Outils sur mesure, SaaS, architecte web.</p></div>
+    </div>
+    <p class="references">Ils nous ont aussi fait confiance : <span>Calmann-Lévy, UGC, BETC, Publicis, Carlsberg, Leclerc, Intel, Chronopost, Mazarine, Nolita.</span></p>
+  </section>
+
+  <section class="contact" id="contact" aria-label="Contact">
+    <p class="surtitre">Contact</p>
+    <a class="adresse" href="mailto:hello@graphik-factory.com">hello@graphik-factory.com</a>
+    <div class="liens"><a href="#" class="visio">Prendre rendez-vous en visio</a><a href="https://wa.me/33680945664">WhatsApp</a><a href="tel:+33680945664">06 80 94 56 64</a></div>
+  </section>
+</main>
+
+<footer class="pied">
+  <span>© 2026 Graphik Factory</span>
+  <p><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#">Facebook</a><a href="#">Mentions légales</a></p>
+</footer>
+
+<script>
+  (function () {
+    // La petite marque de l’en-tête apparaît quand la grande a quitté l’écran
+    var entete = document.getElementById('entete'), grande = document.querySelector('.grande-marque');
+    function marque() { entete.classList.toggle('compacte', grande.getBoundingClientRect().bottom < 90); }
+    function hauteur() { document.documentElement.style.setProperty('--entete', entete.offsetHeight + 'px'); }
+    hauteur(); window.addEventListener('resize', hauteur);
+
+
+    window.addEventListener('scroll', marque, { passive: true }); marque();
+
+    // ?realisation=chateaubriand : cette réalisation passe en tête (lien des mails par métier)
+    var cible = document.getElementById(new URLSearchParams(location.search).get('realisation') || '');
+    var tete = document.querySelector('.projet.tete');
+    if (cible && cible.classList.contains('projet') && cible !== tete) {
+      var repere = document.createElement('span');
+      cible.parentNode.insertBefore(repere, cible);
+      tete.parentNode.insertBefore(cible, tete);
+      repere.parentNode.insertBefore(tete, repere); repere.remove();
+      tete.classList.remove('tete'); cible.classList.add('tete');
+    }
+
+
+    // Empilement des réalisations : bandes et titres collés par le navigateur lui-même (position sticky),
+    // sans calcul au défilement, donc sans vibration. Le script ne fixe que les hauteurs, et le voile de couleur.
+    var secs = [].slice.call(document.querySelectorAll('main > .projet, main > .module.large'));
+    var PAR = 99, piles = [], pile;
+    var parent = secs[0].parentNode, ancre = secs[0];
+    var blocs = secs.map(function (sec, i) {
+      if (i % PAR === 0) { pile = document.createElement('div'); pile.className = 'pile'; parent.insertBefore(pile, ancre); piles.push(pile); }
+      ancre = sec.nextElementSibling;
+      pile.appendChild(sec);
+      var b = sec.querySelector('.bande'), f = sec.querySelector('.film'), l = f.querySelector('.legende');
+      sec.appendChild(l); l.classList.add('flottante');
+      l.style.setProperty('--teinte', b.style.getPropertyValue('--teinte'));
+      var vf = document.createElement('div'); vf.className = 'voile-film'; vf.style.setProperty('--teinte', b.style.getPropertyValue('--teinte')); f.appendChild(vf);
+      return { b: b, f: f, l: l, T: 0 };
+    });
+    // La pile s’en va d’un bloc à la fin des réalisations ; le studio arrive ensuite, sans passer par-dessus
+    function lisse(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+    // Bandeaux pleins, empilés par trois comme les premiers ; la pile suivante repart sous l’en-tête
+    var hauteurRef = window.innerHeight;
+    function empiler() {
+      var E = entete.offsetHeight, T = E;
+      // Hauteur des bandeaux : la plus grande qui permette aux sept de s’accumuler en laissant une bande de film visible
+      var mobile = window.matchMedia('(max-width: 760px)').matches;
+      var FILM = mobile ? 90 : 140;
+      if (mobile) {
+        // taille commune des titres : celle qui fait tenir le plus long sur une ligne
+        var dispo = blocs[0].l.clientWidth - 40, plus = 0;
+        document.documentElement.style.setProperty('--titre', '100px');
+        blocs.forEach(function (x) { var h = x.l.querySelector('h2'); if (h) { h.style.overflow = 'visible'; h.style.fontSize = '20px'; plus = Math.max(plus, h.scrollWidth); h.style.fontSize = ''; h.style.overflow = ''; } });
+        if (plus) document.documentElement.style.setProperty('--titre', Math.floor(20 * dispo / plus) + 'px');
+      }
+      // Sur téléphone, la hauteur de référence ne suit pas la barre d’adresse qui se replie : pas de recalcul en cours de défilement
+      var HV = mobile ? hauteurRef : window.innerHeight;
+      var hb = Math.floor((HV - E - FILM) / blocs.length) + 1;
+      hb = Math.max(64, Math.min(hb, 200));
+      document.documentElement.style.setProperty('--hb', hb + 'px');
+      blocs.forEach(function (x, i) {
+        if (i % PAR === 0) T = E;
+        var H = Math.floor(x.l.getBoundingClientRect().height);
+        x.l.style.setProperty('--h', H + 'px'); x.f.style.setProperty('--h', H + 'px');
+        x.T = T; x.b.style.top = T + 'px'; x.l.style.top = T + 'px';
+        x.b.style.zIndex = 10 + 2 * i; x.l.style.zIndex = 11 + 2 * i;
+        x.H = H; T += H - 1;                                      // chaque bandeau chevauche le précédent d’un pixel : aucun jour
+      });
+      // En fin de pile, les bandeaux doivent partir ensemble : on aligne leurs bas sur celui de la pile,
+      // par des marges qui se compensent dans le flux et ne déplacent rien.
+      blocs.forEach(function (x, i) {
+        var g0 = i - i % PAR, gN = Math.min(g0 + PAR, blocs.length) - 1, dernier = blocs[gN];
+        var bas = dernier.T + dernier.H;
+        var mb = bas - (x.T + x.b.offsetHeight), ml = bas - (x.T + x.H);
+        x.b.style.marginBottom = mb + 'px'; x.f.style.marginTop = (-mb) + 'px';
+        x.l.style.marginBottom = ml + 'px';
+        var suiv = blocs[i + 1];
+        if (suiv && i < gN) suiv.b.style.marginTop = (-ml) + 'px';
+      });
+      voile();
+    }
+    function voile() {
+      blocs.forEach(function (x) {
+        var ecart = Math.max(0, x.l.getBoundingClientRect().top - x.T);   // film visible entre la bande et le titre
+        // le voile ne commence qu’à l’approche de la bande, sur une course proportionnée au film : le site reste visible
+        var rampe = Math.min(420, x.f.offsetHeight * 0.35);
+        var q = lisse(1 - ecart / rampe).toFixed(3);
+        x.l.style.setProperty('--q', q); x.f.style.setProperty('--q', q);
+        x.l.classList.toggle('collee', ecart < 1);
+      });
+    }
+
+    // Un clic sur un bandeau empilé ouvre sa réalisation en grand : le bandeau, puis le film entier, qui tourne
+    var vue = document.createElement('div'); vue.className = 'vue'; vue.setAttribute('role', 'dialog'); vue.setAttribute('aria-modal', 'true');
+    vue.innerHTML = '<div class="vue-tete"></div><div class="vue-film"><video muted loop playsinline></video></div><button class="vue-fermer" aria-label="Fermer">×</button>';
+    document.body.appendChild(vue);
+    var vueVideo = vue.querySelector('video');
+    function ouvrir(x) {
+      var tete = vue.querySelector('.vue-tete');
+      tete.innerHTML = x.l.innerHTML;
+      vue.style.setProperty('--teinte', x.l.style.getPropertyValue('--teinte'));
+      var src = x.f.querySelector('video');
+      (src && src.src ? Promise.resolve() : Promise.resolve()).then(function () {
+        vueVideo.src = src.src || src.dataset.src; vueVideo.currentTime = src.currentTime || 0;
+        var p = vueVideo.play(); if (p && p.catch) p.catch(function () {});
+      });
+      vue.classList.add('ouverte'); document.documentElement.classList.add('vue-active');
+    }
+    function fermer() { vue.classList.remove('ouverte'); document.documentElement.classList.remove('vue-active'); vueVideo.pause(); }
+    vue.querySelector('.vue-fermer').addEventListener('click', fermer);
+    vue.addEventListener('click', function (ev) { if (ev.target === vue || ev.target.classList.contains('vue-film')) fermer(); });
+    window.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') fermer(); });
+    blocs.forEach(function (x) {
+      x.l.addEventListener('click', function (ev) {
+        if (!x.l.classList.contains('collee')) return;          // sur le film, le titre garde son lien vers le site
+        ev.preventDefault(); ouvrir(x);
+      });
+    });
+    empiler();
+    var largeurRef = window.innerWidth;
+    window.addEventListener('resize', function () {
+      // un changement de hauteur seule (barre d’adresse) ne recalcule rien ; un changement de largeur (rotation) recalcule tout
+      if (window.innerWidth === largeurRef && window.matchMedia('(max-width: 760px)').matches) return;
+      largeurRef = window.innerWidth; hauteurRef = window.innerHeight; empiler();
+    });
+    window.addEventListener('scroll', function () { requestAnimationFrame(voile); }, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { hauteur(); empiler(); });
+
+    // Films : tournent sous la souris, se figent sur l’image en cours quand elle sort, reprennent là
+    // Ordinateur : le film tourne sous la souris. Écran tactile (ou aperçu téléphone) : il tourne tout seul quand il est à l’écran.
+    var survol = window.matchMedia('(hover: hover)').matches && window.name !== 'tactile';
+    var tactiles = [];
+    function choisir() {
+      // la zone réellement visible commence sous les bandeaux déjà empilés, pas en haut de l’écran
+      var haut = entete.getBoundingClientRect().bottom;
+      document.querySelectorAll('.legende.flottante.collee').forEach(function (l) { haut = Math.max(haut, l.getBoundingClientRect().bottom); });
+      var zone = Math.max(1, innerHeight - haut), mieux = null, best = 0;
+      tactiles.forEach(function (c) {
+        var r = c.getBoundingClientRect(), px = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, haut));
+        var vis = px / Math.max(1, Math.min(r.height, zone));
+        if (vis > best) { best = vis; mieux = c; }
+      });
+      tactiles.forEach(function (c) { if (c === mieux && best >= 0.2) c._lancer(); else c._v.pause(); });
+    }
+    if (!survol) {
+      // décision pendant le défilement (toutes les 120 ms au plus), puis à l’arrêt
+      var att = null, dernier = 0;
+      window.addEventListener('scroll', function () {
+        var t = Date.now(); if (t - dernier > 120) { dernier = t; choisir(); }
+        clearTimeout(att); att = setTimeout(choisir, 80);
+      }, { passive: true });
+      setTimeout(choisir, 600);
+      document.documentElement.classList.add('tactile');
+    }
+    document.querySelectorAll('.film:not(.fixe)').forEach(function (cadre) {
+      var v = cadre.querySelector('video'), pret = null, dessus = false, attente = null;
+      function preparer() {
+        if (pret) return pret;
+        v.muted = true; v.playsInline = true;
+        // au survol, le film doit partir sans attendre ; au doigt, il ne se télécharge que s’il tourne
+        v.preload = survol ? 'auto' : 'metadata'; v.src = v.dataset.src;
+        pret = Promise.resolve();
+        return pret;
+      }
+      function lancer() { preparer().then(function () { if (survol && !dessus) return; v.muted = true; var p = v.play(); if (p && p.then) p.then(function () { cadre.classList.add('joue'); }).catch(function () {}); else cadre.classList.add('joue'); }); }
+      function visible() { var r = cadre.getBoundingClientRect(); return r.top < innerHeight * .85 && r.bottom > innerHeight * .15; }
+      if (survol) {
+        cadre.addEventListener('mouseenter', function () { dessus = true; lancer(); });
+        cadre.addEventListener('mouseleave', function () { dessus = false; v.pause(); });
+      } else {
+        // un seul film tourne : le plus visible à l’écran ; les autres se figent
+        cadre._lancer = lancer; cadre._v = v; tactiles.push(cadre);
+      }
+      // Le film de tête se charge d’emblée, les autres à l’approche de l’écran ; sorti de l’écran, un film se met en pause
+      if (cadre.closest('.tete')) { v.preload = 'auto'; v.src = v.dataset.src; pret = Promise.resolve(); }
+      new IntersectionObserver(function (e) { if (e[e.length - 1].isIntersecting) preparer(); }, { rootMargin: '200px 0px' }).observe(cadre);
+      new IntersectionObserver(function (e) { if (!e[e.length - 1].isIntersecting) v.pause(); }).observe(cadre);
+    });
+  })();
+</script>
+</body>
+</html>
